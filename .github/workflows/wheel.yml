@@ -9,15 +9,10 @@ jobs:
       fail-fast: false
       matrix:
         image:
-          - 'quay.io/pypa/manylinux2010_i686:2021-02-06-3d322a5'
-          - 'quay.io/pypa/manylinux2010_x86_64:2021-02-06-3d322a5'
-          - 'quay.io/pypa/manylinux2014_i686:2021-01-24-91ce2b8'
-          - 'quay.io/pypa/manylinux2014_x86_64:2021-01-24-91ce2b8'
+          - 'quay.io/pypa/manylinux2014_x86_64:2021-02-07-8435c06'
+          - 'quay.io/pypa/manylinux2014_x86_64:2021-02-07-8cce88b'
+          - 'quay.io/pypa/manylinux2014_x86_64:2021-02-06-93da623'
         py:
-          - 'cp35-cp35m'
-          - 'cp36-cp36m'
-          - 'cp37-cp37m'
-          - 'cp38-cp38'
           - 'cp39-cp39'
     runs-on: 'ubuntu-20.04'
     steps:
@@ -26,80 +21,6 @@ jobs:
       - name: Build Wheel
         run: |
           docker run -e PYPATH=/opt/python/${{ matrix.py }} -e ZSTD_WARNINGS_AS_ERRORS=1 --rm -v `pwd`:/project ${{ matrix.image }} /project/ci/build-manylinux-wheel.sh
-
-      - name: Upload Wheel
-        uses: actions/upload-artifact@v2
-        with:
-          path: dist
-
-  macos:
-    strategy:
-      fail-fast: false
-      matrix:
-        py:
-          - 'cp35-*'
-          - 'cp36-*'
-          - 'cp37-*'
-          - 'cp38-*'
-          - 'cp39-*'
-    runs-on: 'macos-10.15'
-    env:
-      CIBW_BUILD: ${{ matrix.py }}
-      CIBW_BUILD_VERBOSITY: '1'
-      ZSTD_WARNINGS_AS_ERRORS: '1'
-    steps:
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.8'
-
-      - uses: actions/checkout@v2
-
-      - name: Install Dependencies
-        run: |
-          pip install --require-hashes -r ci/requirements.macoswheels.txt
-
-      - name: Build Wheel
-        run: |
-          cibuildwheel --output-dir dist
-
-      - name: Upload Wheel
-        uses: actions/upload-artifact@v2
-        with:
-          path: dist
-
-  windows:
-    strategy:
-      fail-fast: false
-      matrix:
-        py:
-          - '3.5'
-          - '3.6'
-          - '3.7'
-          - '3.8'
-          - '3.9'
-        arch:
-          - 'x86'
-          - 'x64'
-    runs-on: 'windows-2019'
-    env:
-      ZSTD_WARNINGS_AS_ERRORS: '1'
-    steps:
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.py }}
-          architecture: ${{ matrix.arch }}
-
-      - uses: actions/checkout@v2
-
-      - name: Install Dependencies
-        run: |
-          pip install --require-hashes -r ci/requirements.txt
-
-      - name: Build Wheel
-        run: |
-          python setup.py bdist_wheel
 
       - name: Upload Wheel
         uses: actions/upload-artifact@v2
