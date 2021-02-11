@@ -4,34 +4,6 @@ on:
   schedule:
     - cron: '13 4 * * *'
 jobs:
-  linux:
-    strategy:
-      fail-fast: false
-      matrix:
-        image:
-          - 'quay.io/pypa/manylinux2010_i686'
-          - 'quay.io/pypa/manylinux2010_x86_64'
-          - 'quay.io/pypa/manylinux2014_i686'
-          - 'quay.io/pypa/manylinux2014_x86_64'
-        py:
-          - 'cp35-cp35m'
-          - 'cp36-cp36m'
-          - 'cp37-cp37m'
-          - 'cp38-cp38'
-          - 'cp39-cp39'
-    runs-on: 'ubuntu-20.04'
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Build Wheel
-        run: |
-          docker run -e PYPATH=/opt/python/${{ matrix.py }} -e ZSTD_WARNINGS_AS_ERRORS=1 --rm -v `pwd`:/project ${{ matrix.image }} /project/ci/build-manylinux-wheel.sh
-
-      - name: Upload Wheel
-        uses: actions/upload-artifact@v2
-        with:
-          path: dist
-
   macos:
     strategy:
       fail-fast: false
@@ -44,6 +16,8 @@ jobs:
           - 'cp39-*'
         arch: ['x86_64']
         include:
+          - py: 'cp38-*'
+            arch: 'arm64'
           - py: 'cp39-*'
             arch: 'arm64'
     runs-on: 'macos-10.15'
@@ -57,54 +31,35 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '3.8'
+        if: ${{ matrix.py != 'cp38-*' || matrix.arch != 'arm64' }}
 
       - uses: actions/checkout@v2
 
       - name: Install Dependencies
         run: |
           pip install --require-hashes -r ci/requirements.macoswheels.txt
+        if: ${{ matrix.py != 'cp38-*' || matrix.arch != 'arm64' }}
+
+      - name: Install Dependencies
+        run: |
+          /Applications/Xcode_12.2.app/Contents/Developer/usr/bin/pip3 install --user --require-hashes -r ci/requirements.macoswheels.txt
+          /Applications/Xcode_12.2.app/Contents/Developer/usr/bin/pip3 install --user wheel
+        if: ${{ matrix.py == 'cp38-*' && matrix.arch == 'arm64' }}
 
       - name: Build Wheel
         run: |
           cibuildwheel --output-dir dist
-
-      - name: Upload Wheel
-        uses: actions/upload-artifact@v2
-        with:
-          path: dist
-
-  windows:
-    strategy:
-      fail-fast: false
-      matrix:
-        py:
-          - '3.5'
-          - '3.6'
-          - '3.7'
-          - '3.8'
-          - '3.9'
-        arch:
-          - 'x86'
-          - 'x64'
-    runs-on: 'windows-2019'
-    env:
-      ZSTD_WARNINGS_AS_ERRORS: '1'
-    steps:
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.py }}
-          architecture: ${{ matrix.arch }}
-
-      - uses: actions/checkout@v2
-
-      - name: Install Dependencies
-        run: |
-          pip install --require-hashes -r ci/requirements.txt
+        if: ${{ matrix.py != 'cp38-*' || matrix.arch != 'arm64' }}
 
       - name: Build Wheel
         run: |
-          python setup.py bdist_wheel
+          /Applications/Xcode_12.2.app/Contents/Developer/usr/bin/python3 setup.py bdist_wheel
+        env:
+          _PYTHON_HOST_PLATFORM: 'macosx-11.0-arm64'
+          ARCHFLAGS: '-arch arm64'
+          MACOSX_DEPLOYMENT_TARGET: '11.0'
+          SDKROOT: '/Applications/Xcode_12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk'
+        if: ${{ matrix.py == 'cp38-*' && matrix.arch == 'arm64' }}
 
       - name: Upload Wheel
         uses: actions/upload-artifact@v2
