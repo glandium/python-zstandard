@@ -126,7 +126,7 @@ static int ZstdCompressor_init(ZstdCompressor *self, PyObject *args,
             dict = NULL;
         }
         else if (!PyObject_IsInstance(dict,
-                                      (PyObject *)&ZstdCompressionDictType)) {
+                                      (PyObject *)ZstdCompressionDictType)) {
             PyErr_Format(PyExc_TypeError,
                          "dict_data must be zstd.ZstdCompressionDict");
             return -1;
@@ -138,7 +138,7 @@ static int ZstdCompressor_init(ZstdCompressor *self, PyObject *args,
             params = NULL;
         }
         else if (!PyObject_IsInstance(
-                     params, (PyObject *)&ZstdCompressionParametersType)) {
+                     params, (PyObject *)ZstdCompressionParametersType)) {
             PyErr_Format(
                 PyExc_TypeError,
                 "compression_params must be zstd.ZstdCompressionParameters");
@@ -455,7 +455,7 @@ static ZstdCompressionReader *ZstdCompressor_stream_reader(ZstdCompressor *self,
     }
 
     result = (ZstdCompressionReader *)PyObject_CallObject(
-        (PyObject *)&ZstdCompressionReaderType, NULL);
+        (PyObject *)ZstdCompressionReaderType, NULL);
     if (!result) {
         return NULL;
     }
@@ -598,7 +598,7 @@ static ZstdCompressionObj *ZstdCompressor_compressobj(ZstdCompressor *self,
     }
 
     result = (ZstdCompressionObj *)PyObject_CallObject(
-        (PyObject *)&ZstdCompressionObjType, NULL);
+        (PyObject *)ZstdCompressionObjType, NULL);
     if (!result) {
         return NULL;
     }
@@ -634,7 +634,7 @@ static ZstdCompressorIterator *ZstdCompressor_read_to_iter(ZstdCompressor *self,
     }
 
     result = (ZstdCompressorIterator *)PyObject_CallObject(
-        (PyObject *)&ZstdCompressorIteratorType, NULL);
+        (PyObject *)ZstdCompressorIteratorType, NULL);
     if (!result) {
         return NULL;
     }
@@ -723,7 +723,7 @@ static ZstdCompressionWriter *ZstdCompressor_stream_writer(ZstdCompressor *self,
     }
 
     result = (ZstdCompressionWriter *)PyObject_CallObject(
-        (PyObject *)&ZstdCompressionWriterType, NULL);
+        (PyObject *)ZstdCompressionWriterType, NULL);
     if (!result) {
         return NULL;
     }
@@ -780,7 +780,7 @@ ZstdCompressor_chunker(ZstdCompressor *self, PyObject *args, PyObject *kwargs) {
     }
 
     chunker = (ZstdCompressionChunker *)PyObject_CallObject(
-        (PyObject *)&ZstdCompressionChunkerType, NULL);
+        (PyObject *)ZstdCompressionChunkerType, NULL);
     if (!chunker) {
         return NULL;
     }
@@ -1298,7 +1298,7 @@ compress_from_datasources(ZstdCompressor *compressor, DataSources *sources,
     }
 
     result = (ZstdBufferWithSegmentsCollection *)PyObject_CallObject(
-        (PyObject *)&ZstdBufferWithSegmentsCollectionType, segmentsArg);
+        (PyObject *)ZstdBufferWithSegmentsCollectionType, segmentsArg);
 
 finally:
     Py_CLEAR(segmentsArg);
@@ -1366,7 +1366,7 @@ ZstdCompressor_multi_compress_to_buffer(ZstdCompressor *self, PyObject *args,
         threads = 1;
     }
 
-    if (PyObject_TypeCheck(data, &ZstdBufferWithSegmentsType)) {
+    if (PyObject_TypeCheck(data, ZstdBufferWithSegmentsType)) {
         ZstdBufferWithSegments *buffer = (ZstdBufferWithSegments *)data;
 
         sources.sources =
@@ -1392,7 +1392,7 @@ ZstdCompressor_multi_compress_to_buffer(ZstdCompressor *self, PyObject *args,
 
         sources.sourcesSize = buffer->segmentCount;
     }
-    else if (PyObject_TypeCheck(data, &ZstdBufferWithSegmentsCollectionType)) {
+    else if (PyObject_TypeCheck(data, ZstdBufferWithSegmentsCollectionType)) {
         Py_ssize_t j;
         Py_ssize_t offset = 0;
         ZstdBufferWithSegments *buffer;
@@ -1528,52 +1528,30 @@ static PyMethodDef ZstdCompressor_methods[] = {
      METH_NOARGS, NULL},
     {NULL, NULL}};
 
-PyTypeObject ZstdCompressorType = {
-    PyVarObject_HEAD_INIT(NULL, 0) "zstd.ZstdCompressor", /* tp_name */
-    sizeof(ZstdCompressor),                               /* tp_basicsize */
-    0,                                                    /* tp_itemsize */
-    (destructor)ZstdCompressor_dealloc,                   /* tp_dealloc */
-    0,                                                    /* tp_print */
-    0,                                                    /* tp_getattr */
-    0,                                                    /* tp_setattr */
-    0,                                                    /* tp_compare */
-    0,                                                    /* tp_repr */
-    0,                                                    /* tp_as_number */
-    0,                                                    /* tp_as_sequence */
-    0,                                                    /* tp_as_mapping */
-    0,                                                    /* tp_hash */
-    0,                                                    /* tp_call */
-    0,                                                    /* tp_str */
-    0,                                                    /* tp_getattro */
-    0,                                                    /* tp_setattro */
-    0,                                                    /* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,             /* tp_flags */
-    0,                                                    /* tp_doc */
-    0,                                                    /* tp_traverse */
-    0,                                                    /* tp_clear */
-    0,                                                    /* tp_richcompare */
-    0,                             /* tp_weaklistoffset */
-    0,                             /* tp_iter */
-    0,                             /* tp_iternext */
-    ZstdCompressor_methods,        /* tp_methods */
-    0,                             /* tp_members */
-    0,                             /* tp_getset */
-    0,                             /* tp_base */
-    0,                             /* tp_dict */
-    0,                             /* tp_descr_get */
-    0,                             /* tp_descr_set */
-    0,                             /* tp_dictoffset */
-    (initproc)ZstdCompressor_init, /* tp_init */
-    0,                             /* tp_alloc */
-    PyType_GenericNew,             /* tp_new */
+PyType_Slot ZstdCompressorSlots[] = {
+    {Py_tp_dealloc, ZstdCompressor_dealloc},
+    {Py_tp_methods, ZstdCompressor_methods},
+    {Py_tp_init, ZstdCompressor_init},
+    {Py_tp_new, PyType_GenericNew},
+    {0, NULL},
 };
 
+PyType_Spec ZstdCompressorSpec = {
+    "zstd.ZstdCompressor",
+    sizeof(ZstdCompressor),
+    0,
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
+    ZstdCompressorSlots,
+};
+
+PyTypeObject *ZstdCompressorType;
+
 void compressor_module_init(PyObject *mod) {
-    Py_SET_TYPE(&ZstdCompressorType, &PyType_Type);
-    if (PyType_Ready(&ZstdCompressorType) < 0) {
+    ZstdCompressorType = (PyTypeObject *)PyType_FromSpec(&ZstdCompressorSpec);
+    if (PyType_Ready(ZstdCompressorType) < 0) {
         return;
     }
 
-    Py_INCREF((PyObject *)&ZstdCompressorType);
-    PyModule_AddObject(mod, "ZstdCompressor", (PyObject *)&ZstdCompressorType);
+    Py_INCREF((PyObject *)ZstdCompressorType);
+    PyModule_AddObject(mod, "ZstdCompressor", (PyObject *)ZstdCompressorType);
 }

@@ -47,7 +47,7 @@ typedef struct {
     PyObject_HEAD ZSTD_CCtx_params *params;
 } ZstdCompressionParametersObject;
 
-extern PyTypeObject ZstdCompressionParametersType;
+extern PyTypeObject *ZstdCompressionParametersType;
 
 /*
    Represents a FrameParameters type.
@@ -61,7 +61,7 @@ typedef struct {
     char checksumFlag;
 } FrameParametersObject;
 
-extern PyTypeObject FrameParametersType;
+extern PyTypeObject *FrameParametersType;
 
 /*
    Represents a ZstdCompressionDict type.
@@ -87,7 +87,7 @@ typedef struct {
     ZSTD_DDict *ddict;
 } ZstdCompressionDict;
 
-extern PyTypeObject ZstdCompressionDictType;
+extern PyTypeObject *ZstdCompressionDictType;
 
 /*
    Represents a ZstdCompressor type.
@@ -106,7 +106,7 @@ typedef struct {
     ZSTD_CCtx_params *params;
 } ZstdCompressor;
 
-extern PyTypeObject ZstdCompressorType;
+extern PyTypeObject *ZstdCompressorType;
 
 typedef struct {
     PyObject_HEAD
@@ -116,7 +116,7 @@ typedef struct {
     int finished;
 } ZstdCompressionObj;
 
-extern PyTypeObject ZstdCompressionObjType;
+extern PyTypeObject *ZstdCompressionObjType;
 
 typedef struct {
     PyObject_HEAD
@@ -133,7 +133,7 @@ typedef struct {
     unsigned long long bytesCompressed;
 } ZstdCompressionWriter;
 
-extern PyTypeObject ZstdCompressionWriterType;
+extern PyTypeObject *ZstdCompressionWriterType;
 
 typedef struct {
     PyObject_HEAD
@@ -152,7 +152,7 @@ typedef struct {
     PyObject *readResult;
 } ZstdCompressorIterator;
 
-extern PyTypeObject ZstdCompressorIteratorType;
+extern PyTypeObject *ZstdCompressorIteratorType;
 
 typedef struct {
     PyObject_HEAD
@@ -174,7 +174,7 @@ typedef struct {
     PyObject *readResult;
 } ZstdCompressionReader;
 
-extern PyTypeObject ZstdCompressionReaderType;
+extern PyTypeObject *ZstdCompressionReaderType;
 
 typedef struct {
     PyObject_HEAD
@@ -187,7 +187,7 @@ typedef struct {
     size_t chunkSize;
 } ZstdCompressionChunker;
 
-extern PyTypeObject ZstdCompressionChunkerType;
+extern PyTypeObject *ZstdCompressionChunkerType;
 
 typedef enum {
     compressionchunker_mode_normal,
@@ -202,7 +202,7 @@ typedef struct {
     CompressionChunkerMode mode;
 } ZstdCompressionChunkerIterator;
 
-extern PyTypeObject ZstdCompressionChunkerIteratorType;
+extern PyTypeObject *ZstdCompressionChunkerIteratorType;
 
 typedef struct {
     PyObject_HEAD
@@ -213,7 +213,7 @@ typedef struct {
     ZSTD_format_e format;
 } ZstdDecompressor;
 
-extern PyTypeObject ZstdDecompressorType;
+extern PyTypeObject *ZstdDecompressorType;
 
 typedef struct {
     PyObject_HEAD
@@ -224,7 +224,7 @@ typedef struct {
     PyObject *unused_data;
 } ZstdDecompressionObj;
 
-extern PyTypeObject ZstdDecompressionObjType;
+extern PyTypeObject *ZstdDecompressionObjType;
 
 typedef struct {
     PyObject_HEAD
@@ -262,7 +262,7 @@ typedef struct {
     int finishedOutput;
 } ZstdDecompressionReader;
 
-extern PyTypeObject ZstdDecompressionReaderType;
+extern PyTypeObject *ZstdDecompressionReaderType;
 
 typedef struct {
     PyObject_HEAD
@@ -277,7 +277,7 @@ typedef struct {
     int closefd;
 } ZstdDecompressionWriter;
 
-extern PyTypeObject ZstdDecompressionWriterType;
+extern PyTypeObject *ZstdDecompressionWriterType;
 
 typedef struct {
     PyObject_HEAD
@@ -296,7 +296,7 @@ typedef struct {
     int finishedOutput;
 } ZstdDecompressorIterator;
 
-extern PyTypeObject ZstdDecompressorIteratorType;
+extern PyTypeObject *ZstdDecompressorIteratorType;
 
 typedef struct {
     int errored;
@@ -319,7 +319,7 @@ typedef struct {
     Py_ssize_t segmentCount;
 } ZstdBufferSegments;
 
-extern PyTypeObject ZstdBufferSegmentsType;
+extern PyTypeObject *ZstdBufferSegmentsType;
 
 typedef struct {
     PyObject_HEAD
@@ -330,7 +330,7 @@ typedef struct {
     unsigned long long offset;
 } ZstdBufferSegment;
 
-extern PyTypeObject ZstdBufferSegmentType;
+extern PyTypeObject *ZstdBufferSegmentType;
 
 typedef struct {
     PyObject_HEAD
@@ -343,7 +343,7 @@ typedef struct {
     int useFree;
 } ZstdBufferWithSegments;
 
-extern PyTypeObject ZstdBufferWithSegmentsType;
+extern PyTypeObject *ZstdBufferWithSegmentsType;
 
 /**
  * An ordered collection of BufferWithSegments exposed as a squashed collection.
@@ -366,7 +366,7 @@ typedef struct {
     Py_ssize_t *firstElements;
 } ZstdBufferWithSegmentsCollection;
 
-extern PyTypeObject ZstdBufferWithSegmentsCollectionType;
+extern PyTypeObject *ZstdBufferWithSegmentsCollectionType;
 
 int set_parameter(ZSTD_CCtx_params *params, ZSTD_cParameter param, int value);
 int set_parameters(ZSTD_CCtx_params *params,

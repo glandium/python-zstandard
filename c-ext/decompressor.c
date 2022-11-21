@@ -76,7 +76,7 @@ static int Decompressor_init(ZstdDecompressor *self, PyObject *args,
             dict = NULL;
         }
         else if (!PyObject_IsInstance(dict,
-                                      (PyObject *)&ZstdCompressionDictType)) {
+                                      (PyObject *)ZstdCompressionDictType)) {
             PyErr_Format(PyExc_TypeError,
                          "dict_data must be zstd.ZstdCompressionDict");
             return -1;
@@ -413,7 +413,7 @@ static ZstdDecompressionObj *Decompressor_decompressobj(ZstdDecompressor *self,
     }
 
     result = (ZstdDecompressionObj *)PyObject_CallObject(
-        (PyObject *)&ZstdDecompressionObjType, NULL);
+        (PyObject *)ZstdDecompressionObjType, NULL);
     if (!result) {
         return NULL;
     }
@@ -454,7 +454,7 @@ Decompressor_read_to_iter(ZstdDecompressor *self, PyObject *args,
     }
 
     result = (ZstdDecompressorIterator *)PyObject_CallObject(
-        (PyObject *)&ZstdDecompressorIteratorType, NULL);
+        (PyObject *)ZstdDecompressorIteratorType, NULL);
     if (!result) {
         return NULL;
     }
@@ -526,7 +526,7 @@ Decompressor_stream_reader(ZstdDecompressor *self, PyObject *args,
     }
 
     result = (ZstdDecompressionReader *)PyObject_CallObject(
-        (PyObject *)&ZstdDecompressionReaderType, NULL);
+        (PyObject *)ZstdDecompressionReaderType, NULL);
     if (NULL == result) {
         return NULL;
     }
@@ -591,7 +591,7 @@ Decompressor_stream_writer(ZstdDecompressor *self, PyObject *args,
     }
 
     result = (ZstdDecompressionWriter *)PyObject_CallObject(
-        (PyObject *)&ZstdDecompressionWriterType, NULL);
+        (PyObject *)ZstdDecompressionWriterType, NULL);
     if (!result) {
         return NULL;
     }
@@ -1415,7 +1415,7 @@ decompress_from_framesources(ZstdDecompressor *decompressor,
     }
 
     result = (ZstdBufferWithSegmentsCollection *)PyObject_CallObject(
-        (PyObject *)&ZstdBufferWithSegmentsCollectionType, resultArg);
+        (PyObject *)ZstdBufferWithSegmentsCollectionType, resultArg);
 
 finally:
     Py_CLEAR(resultArg);
@@ -1492,7 +1492,7 @@ Decompressor_multi_decompress_to_buffer(ZstdDecompressor *self, PyObject *args,
         threads = 1;
     }
 
-    if (PyObject_TypeCheck(frames, &ZstdBufferWithSegmentsType)) {
+    if (PyObject_TypeCheck(frames, ZstdBufferWithSegmentsType)) {
         ZstdBufferWithSegments *buffer = (ZstdBufferWithSegments *)frames;
         frameCount = buffer->segmentCount;
 
@@ -1551,8 +1551,7 @@ Decompressor_multi_decompress_to_buffer(ZstdDecompressor *self, PyObject *args,
             framePointers[i].destSize = (size_t)decompressedSize;
         }
     }
-    else if (PyObject_TypeCheck(frames,
-                                &ZstdBufferWithSegmentsCollectionType)) {
+    else if (PyObject_TypeCheck(frames, ZstdBufferWithSegmentsCollectionType)) {
         Py_ssize_t offset = 0;
         ZstdBufferWithSegments *buffer;
         ZstdBufferWithSegmentsCollection *collection =
@@ -1734,53 +1733,32 @@ static PyMethodDef Decompressor_methods[] = {
     {"memory_size", (PyCFunction)Decompressor_memory_size, METH_NOARGS, NULL},
     {NULL, NULL}};
 
-PyTypeObject ZstdDecompressorType = {
-    PyVarObject_HEAD_INIT(NULL, 0) "zstd.ZstdDecompressor", /* tp_name */
-    sizeof(ZstdDecompressor),                               /* tp_basicsize */
-    0,                                                      /* tp_itemsize */
-    (destructor)Decompressor_dealloc,                       /* tp_dealloc */
-    0,                                                      /* tp_print */
-    0,                                                      /* tp_getattr */
-    0,                                                      /* tp_setattr */
-    0,                                                      /* tp_compare */
-    0,                                                      /* tp_repr */
-    0,                                                      /* tp_as_number */
-    0,                                                      /* tp_as_sequence */
-    0,                                                      /* tp_as_mapping */
-    0,                                                      /* tp_hash */
-    0,                                                      /* tp_call */
-    0,                                                      /* tp_str */
-    0,                                                      /* tp_getattro */
-    0,                                                      /* tp_setattro */
-    0,                                                      /* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,               /* tp_flags */
-    0,                                                      /* tp_doc */
-    0,                                                      /* tp_traverse */
-    0,                                                      /* tp_clear */
-    0,                                                      /* tp_richcompare */
-    0,                           /* tp_weaklistoffset */
-    0,                           /* tp_iter */
-    0,                           /* tp_iternext */
-    Decompressor_methods,        /* tp_methods */
-    0,                           /* tp_members */
-    0,                           /* tp_getset */
-    0,                           /* tp_base */
-    0,                           /* tp_dict */
-    0,                           /* tp_descr_get */
-    0,                           /* tp_descr_set */
-    0,                           /* tp_dictoffset */
-    (initproc)Decompressor_init, /* tp_init */
-    0,                           /* tp_alloc */
-    PyType_GenericNew,           /* tp_new */
+PyType_Slot ZstdDecompressorSlots[] = {
+    {Py_tp_dealloc, Decompressor_dealloc},
+    {Py_tp_methods, Decompressor_methods},
+    {Py_tp_init, Decompressor_init},
+    {Py_tp_new, PyType_GenericNew},
+    {0, NULL},
 };
 
+PyType_Spec ZstdDecompressorSpec = {
+    "zstd.ZstdDecompressor",
+    sizeof(ZstdDecompressor),
+    0,
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
+    ZstdDecompressorSlots,
+};
+
+PyTypeObject *ZstdDecompressorType;
+
 void decompressor_module_init(PyObject *mod) {
-    Py_SET_TYPE(&ZstdDecompressorType, &PyType_Type);
-    if (PyType_Ready(&ZstdDecompressorType) < 0) {
+    ZstdDecompressorType =
+        (PyTypeObject *)PyType_FromSpec(&ZstdDecompressorSpec);
+    if (PyType_Ready(ZstdDecompressorType) < 0) {
         return;
     }
 
-    Py_INCREF((PyObject *)&ZstdDecompressorType);
+    Py_INCREF((PyObject *)ZstdDecompressorType);
     PyModule_AddObject(mod, "ZstdDecompressor",
-                       (PyObject *)&ZstdDecompressorType);
+                       (PyObject *)ZstdDecompressorType);
 }

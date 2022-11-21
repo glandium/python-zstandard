@@ -135,46 +135,23 @@ ZstdCompressionChunkerIterator_iternext(ZstdCompressionChunkerIterator *self) {
     return chunk;
 }
 
-PyTypeObject ZstdCompressionChunkerIteratorType = {
-    PyVarObject_HEAD_INIT(
-        NULL, 0) "zstd.ZstdCompressionChunkerIterator", /* tp_name */
-    sizeof(ZstdCompressionChunkerIterator),             /* tp_basicsize */
-    0,                                                  /* tp_itemsize */
-    (destructor)ZstdCompressionChunkerIterator_dealloc, /* tp_dealloc */
-    0,                                                  /* tp_print */
-    0,                                                  /* tp_getattr */
-    0,                                                  /* tp_setattr */
-    0,                                                  /* tp_compare */
-    0,                                                  /* tp_repr */
-    0,                                                  /* tp_as_number */
-    0,                                                  /* tp_as_sequence */
-    0,                                                  /* tp_as_mapping */
-    0,                                                  /* tp_hash */
-    0,                                                  /* tp_call */
-    0,                                                  /* tp_str */
-    0,                                                  /* tp_getattro */
-    0,                                                  /* tp_setattro */
-    0,                                                  /* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,           /* tp_flags */
-    0,                                                  /* tp_doc */
-    0,                                                  /* tp_traverse */
-    0,                                                  /* tp_clear */
-    0,                                                  /* tp_richcompare */
-    0,                                                  /* tp_weaklistoffset */
-    ZstdCompressionChunkerIterator_iter,                /* tp_iter */
-    (iternextfunc)ZstdCompressionChunkerIterator_iternext, /* tp_iternext */
-    0,                                                     /* tp_methods */
-    0,                                                     /* tp_members */
-    0,                                                     /* tp_getset */
-    0,                                                     /* tp_base */
-    0,                                                     /* tp_dict */
-    0,                                                     /* tp_descr_get */
-    0,                                                     /* tp_descr_set */
-    0,                                                     /* tp_dictoffset */
-    0,                                                     /* tp_init */
-    0,                                                     /* tp_alloc */
-    PyType_GenericNew,                                     /* tp_new */
+PyType_Slot ZstdCompressionChunkerIteratorSlots[] = {
+    {Py_tp_dealloc, ZstdCompressionChunkerIterator_dealloc},
+    {Py_tp_iter, ZstdCompressionChunkerIterator_iter},
+    {Py_tp_iternext, ZstdCompressionChunkerIterator_iternext},
+    {Py_tp_new, PyType_GenericNew},
+    {0, NULL},
 };
+
+PyType_Spec ZstdCompressionChunkerIteratorSpec = {
+    "zstd.ZstdCompressionChunkerIterator",
+    sizeof(ZstdCompressionChunkerIterator),
+    0,
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
+    ZstdCompressionChunkerIteratorSlots,
+};
+
+PyTypeObject *ZstdCompressionChunkerIteratorType;
 
 static void ZstdCompressionChunker_dealloc(ZstdCompressionChunker *self) {
     PyBuffer_Release(&self->inBuffer);
@@ -213,7 +190,7 @@ ZstdCompressionChunker_compress(ZstdCompressionChunker *self, PyObject *args,
     }
 
     result = (ZstdCompressionChunkerIterator *)PyObject_CallObject(
-        (PyObject *)&ZstdCompressionChunkerIteratorType, NULL);
+        (PyObject *)ZstdCompressionChunkerIteratorType, NULL);
     if (!result) {
         PyBuffer_Release(&self->inBuffer);
         return NULL;
@@ -248,7 +225,7 @@ ZstdCompressionChunker_finish(ZstdCompressionChunker *self) {
     }
 
     result = (ZstdCompressionChunkerIterator *)PyObject_CallObject(
-        (PyObject *)&ZstdCompressionChunkerIteratorType, NULL);
+        (PyObject *)ZstdCompressionChunkerIteratorType, NULL);
     if (!result) {
         return NULL;
     }
@@ -279,7 +256,7 @@ ZstdCompressionChunker_flush(ZstdCompressionChunker *self, PyObject *args,
     }
 
     result = (ZstdCompressionChunkerIterator *)PyObject_CallObject(
-        (PyObject *)&ZstdCompressionChunkerIteratorType, NULL);
+        (PyObject *)ZstdCompressionChunkerIteratorType, NULL);
     if (!result) {
         return NULL;
     }
@@ -301,55 +278,33 @@ static PyMethodDef ZstdCompressionChunker_methods[] = {
      METH_VARARGS | METH_KEYWORDS, PyDoc_STR("finish compression operation")},
     {NULL, NULL}};
 
-PyTypeObject ZstdCompressionChunkerType = {
-    PyVarObject_HEAD_INIT(NULL,
-                          0) "zstd.ZstdCompressionChunkerType", /* tp_name */
-    sizeof(ZstdCompressionChunker),             /* tp_basicsize */
-    0,                                          /* tp_itemsize */
-    (destructor)ZstdCompressionChunker_dealloc, /* tp_dealloc */
-    0,                                          /* tp_print */
-    0,                                          /* tp_getattr */
-    0,                                          /* tp_setattr */
-    0,                                          /* tp_compare */
-    0,                                          /* tp_repr */
-    0,                                          /* tp_as_number */
-    0,                                          /* tp_as_sequence */
-    0,                                          /* tp_as_mapping */
-    0,                                          /* tp_hash */
-    0,                                          /* tp_call */
-    0,                                          /* tp_str */
-    0,                                          /* tp_getattro */
-    0,                                          /* tp_setattro */
-    0,                                          /* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,   /* tp_flags */
-    0,                                          /* tp_doc */
-    0,                                          /* tp_traverse */
-    0,                                          /* tp_clear */
-    0,                                          /* tp_richcompare */
-    0,                                          /* tp_weaklistoffset */
-    0,                                          /* tp_iter */
-    0,                                          /* tp_iternext */
-    ZstdCompressionChunker_methods,             /* tp_methods */
-    0,                                          /* tp_members */
-    0,                                          /* tp_getset */
-    0,                                          /* tp_base */
-    0,                                          /* tp_dict */
-    0,                                          /* tp_descr_get */
-    0,                                          /* tp_descr_set */
-    0,                                          /* tp_dictoffset */
-    0,                                          /* tp_init */
-    0,                                          /* tp_alloc */
-    PyType_GenericNew,                          /* tp_new */
+PyType_Slot ZstdCompressionChunkerSlots[] = {
+    {Py_tp_dealloc, ZstdCompressionChunker_dealloc},
+    {Py_tp_methods, ZstdCompressionChunker_methods},
+    {Py_tp_new, PyType_GenericNew},
+    {0, NULL},
 };
 
+PyType_Spec ZstdCompressionChunkerSpec = {
+    "zstd.ZstdCompressionChunkerType",
+    sizeof(ZstdCompressionChunker),
+    0,
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
+    ZstdCompressionChunkerSlots,
+};
+
+PyTypeObject *ZstdCompressionChunkerType;
+
 void compressionchunker_module_init(PyObject *module) {
-    Py_SET_TYPE(&ZstdCompressionChunkerIteratorType, &PyType_Type);
-    if (PyType_Ready(&ZstdCompressionChunkerIteratorType) < 0) {
+    ZstdCompressionChunkerIteratorType =
+        (PyTypeObject *)PyType_FromSpec(&ZstdCompressionChunkerIteratorSpec);
+    if (PyType_Ready(ZstdCompressionChunkerIteratorType) < 0) {
         return;
     }
 
-    Py_SET_TYPE(&ZstdCompressionChunkerType, &PyType_Type);
-    if (PyType_Ready(&ZstdCompressionChunkerType) < 0) {
+    ZstdCompressionChunkerType =
+        (PyTypeObject *)PyType_FromSpec(&ZstdCompressionChunkerSpec);
+    if (PyType_Ready(ZstdCompressionChunkerType) < 0) {
         return;
     }
 }
