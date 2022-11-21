@@ -27,4 +27,4 @@ features = ["experimental", "legacy", "zstdmt"]
 
 [dependencies.pyo3]
 version = "0.15"
-features = ["extension-module"]
+features = ["extension-module"] #, "abi3-py36"]

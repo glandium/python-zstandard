@@ -310,6 +310,8 @@ size_t roundpow2(size_t i) {
  *
  * If non-0 is returned, obj may or may not be NULL.
  */
+PyAPI_FUNC(int) _PyBytes_Resize(PyObject **, Py_ssize_t);
+
 int safe_pybytes_resize(PyObject **obj, Py_ssize_t size) {
     PyObject *tmp;
 
@@ -322,8 +324,8 @@ int safe_pybytes_resize(PyObject **obj, Py_ssize_t size) {
         return -1;
     }
 
-    memcpy(PyBytes_AS_STRING(tmp), PyBytes_AS_STRING(*obj),
-           PyBytes_GET_SIZE(*obj));
+    memcpy(PyBytes_AsString(tmp), PyBytes_AsString(*obj),
+           PyBytes_Size(*obj));
 
     Py_DECREF(*obj);
     *obj = tmp;

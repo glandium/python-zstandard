@@ -118,12 +118,14 @@ def get_c_extension(
         depends=depends,
         extra_compile_args=extra_args,
         libraries=libraries,
+#        define_macros=[("Py_LIMITED_API", "0x03060000")],
+#        py_limited_api=True,
     )
 
 
 class RustExtension(distutils.extension.Extension):
     def __init__(self, name, root):
-        super().__init__(name, [])
+        super().__init__(name, []) #, py_limited_api=True)
 
         self.root = root
 

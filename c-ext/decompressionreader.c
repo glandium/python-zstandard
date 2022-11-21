@@ -659,7 +659,7 @@ static PyObject *decompressionreader_seek(ZstdDecompressionReader *self,
             return NULL;
         }
 
-        readSize = PyBytes_GET_SIZE(readResult);
+        readSize = PyBytes_Size(readResult);
 
         Py_CLEAR(readResult);
 

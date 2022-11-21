@@ -11,7 +11,7 @@
 
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
-#include <pythoncapi_compat.h>
+//#include "pybuffer.h"
 #include "structmember.h"
 
 #define ZSTD_STATIC_LINKING_ONLY

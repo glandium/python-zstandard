@@ -71,14 +71,14 @@ static PyObject *DecompressionObj_decompress(ZstdDecompressionObj *self,
 
         if (output.pos) {
             if (result) {
-                resultSize = PyBytes_GET_SIZE(result);
+                resultSize = PyBytes_Size(result);
                 if (-1 ==
                     safe_pybytes_resize(&result, resultSize + output.pos)) {
                     Py_XDECREF(result);
                     goto except;
                 }
 
-                memcpy(PyBytes_AS_STRING(result) + resultSize, output.dst,
+                memcpy(PyBytes_AsString(result) + resultSize, output.dst,
                        output.pos);
             }
             else {

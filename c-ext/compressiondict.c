@@ -76,13 +76,13 @@ ZstdCompressionDict *train_dictionary(PyObject *self, PyObject *args,
     /* Figure out total size of input samples. */
     samplesLen = PyList_Size(samples);
     for (i = 0; i < samplesLen; i++) {
-        PyObject *sampleItem = PyList_GET_ITEM(samples, i);
+        PyObject *sampleItem = PyList_GetItem(samples, i);
 
         if (!PyBytes_Check(sampleItem)) {
             PyErr_SetString(PyExc_ValueError, "samples must be bytes");
             return NULL;
         }
-        samplesSize += PyBytes_GET_SIZE(sampleItem);
+        samplesSize += PyBytes_Size(sampleItem);
     }
 
     sampleBuffer = PyMem_Malloc(samplesSize);
@@ -99,10 +99,10 @@ ZstdCompressionDict *train_dictionary(PyObject *self, PyObject *args,
 
     sampleOffset = sampleBuffer;
     for (i = 0; i < samplesLen; i++) {
-        PyObject *sampleItem = PyList_GET_ITEM(samples, i);
-        sampleSize = PyBytes_GET_SIZE(sampleItem);
+        PyObject *sampleItem = PyList_GetItem(samples, i);
+        sampleSize = PyBytes_Size(sampleItem);
         sampleSizes[i] = sampleSize;
-        memcpy(sampleOffset, PyBytes_AS_STRING(sampleItem), sampleSize);
+        memcpy(sampleOffset, PyBytes_AsString(sampleItem), sampleSize);
         sampleOffset = (char *)sampleOffset + sampleSize;
     }
 

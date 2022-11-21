@@ -64,7 +64,7 @@ static PyObject *frame_progression(ZSTD_CCtx *cctx) {
         return NULL;
     }
 
-    PyTuple_SET_ITEM(result, 0, value);
+    PyTuple_SetItem(result, 0, value);
 
     value = PyLong_FromUnsignedLongLong(progression.consumed);
     if (!value) {
@@ -72,7 +72,7 @@ static PyObject *frame_progression(ZSTD_CCtx *cctx) {
         return NULL;
     }
 
-    PyTuple_SET_ITEM(result, 1, value);
+    PyTuple_SetItem(result, 1, value);
 
     value = PyLong_FromUnsignedLongLong(progression.produced);
     if (!value) {
@@ -80,7 +80,7 @@ static PyObject *frame_progression(ZSTD_CCtx *cctx) {
         return NULL;
     }
 
-    PyTuple_SET_ITEM(result, 2, value);
+    PyTuple_SetItem(result, 2, value);
 
     return result;
 }
@@ -566,7 +566,8 @@ static PyObject *ZstdCompressor_compress(ZstdCompressor *self, PyObject *args,
         goto finally;
     }
 
-    Py_SET_SIZE(output, outBuffer.pos);
+    //Py_SET_SIZE(output, outBuffer.pos);
+    ((PyVarObject*)output)->ob_size = outBuffer.pos;
 
 finally:
     PyBuffer_Release(&source);
@@ -1293,7 +1294,7 @@ compress_from_datasources(ZstdCompressor *compressor, DataSources *sources,
             destBuffer->dest = NULL;
             destBuffer->segments = NULL;
 
-            PyTuple_SET_ITEM(segmentsArg, segmentIndex++, (PyObject *)buffer);
+            PyTuple_SetItem(segmentsArg, segmentIndex++, (PyObject *)buffer);
         }
     }
 
@@ -1432,7 +1433,7 @@ ZstdCompressor_multi_compress_to_buffer(ZstdCompressor *self, PyObject *args,
         sources.sourcesSize = sourceCount;
     }
     else if (PyList_Check(data)) {
-        sourceCount = PyList_GET_SIZE(data);
+        sourceCount = PyList_Size(data);
 
         sources.sources = PyMem_Malloc(sourceCount * sizeof(DataSource));
         if (NULL == sources.sources) {
@@ -1449,7 +1450,7 @@ ZstdCompressor_multi_compress_to_buffer(ZstdCompressor *self, PyObject *args,
         memset(dataBuffers, 0, sourceCount * sizeof(Py_buffer));
 
         for (i = 0; i < sourceCount; i++) {
-            if (0 != PyObject_GetBuffer(PyList_GET_ITEM(data, i),
+            if (0 != PyObject_GetBuffer(PyList_GetItem(data, i),
                                         &dataBuffers[i], PyBUF_CONTIG_RO)) {
                 PyErr_Clear();
                 PyErr_Format(PyExc_TypeError,

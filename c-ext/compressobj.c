@@ -58,7 +58,7 @@ static PyObject *ZstdCompressionObj_compress(ZstdCompressionObj *self,
 
         if (self->output.pos) {
             if (result) {
-                resultSize = PyBytes_GET_SIZE(result);
+                resultSize = PyBytes_Size(result);
 
                 if (safe_pybytes_resize(&result,
                                         resultSize + self->output.pos)) {
@@ -66,7 +66,7 @@ static PyObject *ZstdCompressionObj_compress(ZstdCompressionObj *self,
                     goto finally;
                 }
 
-                memcpy(PyBytes_AS_STRING(result) + resultSize, self->output.dst,
+                memcpy(PyBytes_AsString(result) + resultSize, self->output.dst,
                        self->output.pos);
             }
             else {
@@ -152,7 +152,7 @@ static PyObject *ZstdCompressionObj_flush(ZstdCompressionObj *self,
 
         if (self->output.pos) {
             if (result) {
-                resultSize = PyBytes_GET_SIZE(result);
+                resultSize = PyBytes_Size(result);
 
                 if (safe_pybytes_resize(&result,
                                         resultSize + self->output.pos)) {
@@ -160,7 +160,7 @@ static PyObject *ZstdCompressionObj_flush(ZstdCompressionObj *self,
                     return NULL;
                 }
 
-                memcpy(PyBytes_AS_STRING(result) + resultSize, self->output.dst,
+                memcpy(PyBytes_AsString(result) + resultSize, self->output.dst,
                        self->output.pos);
             }
             else {

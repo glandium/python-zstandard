@@ -398,7 +398,7 @@ BufferWithSegmentsCollection_init(ZstdBufferWithSegmentsCollection *self,
     }
 
     for (i = 0; i < size; i++) {
-        PyObject *item = PyTuple_GET_ITEM(args, i);
+        PyObject *item = PyTuple_GetItem(args, i);
         if (!PyObject_TypeCheck(item, ZstdBufferWithSegmentsType)) {
             PyErr_SetString(PyExc_TypeError,
                             "arguments must be BufferWithSegments instances");
@@ -431,7 +431,7 @@ BufferWithSegmentsCollection_init(ZstdBufferWithSegmentsCollection *self,
 
     for (i = 0; i < size; i++) {
         ZstdBufferWithSegments *item =
-            (ZstdBufferWithSegments *)PyTuple_GET_ITEM(args, i);
+            (ZstdBufferWithSegments *)PyTuple_GetItem(args, i);
 
         self->buffers[i] = item;
         Py_INCREF(item);

@@ -13,6 +13,20 @@ import os
 import sys
 from setuptools import setup
 
+try:
+    from wheel.bdist_wheel import bdist_wheel
+
+    class bdist_wheel_abi3(bdist_wheel):
+        def get_tag(self):
+            python, abi, plat = super().get_tag()
+
+            if python.startswith("cp"):
+                return "cp36", "abi3", plat
+
+            return python, abi, plat
+
+except ImportError:
+    bdist_wheel_abi3 = None
 
 if sys.version_info[0:2] < (3, 6):
     print("Python 3.6+ is required", file=sys.stderr)
@@ -143,7 +157,10 @@ setup(
     packages=["zstandard"],
     package_data={"zstandard": ["__init__.pyi", "py.typed"]},
     ext_modules=extensions,
-    cmdclass={"build_ext": setup_zstd.RustBuildExt},
+    cmdclass={
+        "build_ext": setup_zstd.RustBuildExt,
+        "bdist_wheel": bdist_wheel_abi3,
+    },
     test_suite="tests",
     install_requires=[
         # cffi is required on PyPy.

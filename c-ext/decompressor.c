@@ -1410,7 +1410,7 @@ decompress_from_framesources(ZstdDecompressor *decompressor,
             destBuffer->dest = NULL;
             destBuffer->segments = NULL;
 
-            PyTuple_SET_ITEM(resultArg, resultIndex++, (PyObject *)bws);
+            PyTuple_SetItem(resultArg, resultIndex++, (PyObject *)bws);
         }
     }
 
@@ -1622,7 +1622,7 @@ Decompressor_multi_decompress_to_buffer(ZstdDecompressor *self, PyObject *args,
         }
     }
     else if (PyList_Check(frames)) {
-        frameCount = PyList_GET_SIZE(frames);
+        frameCount = PyList_Size(frames);
 
         if (frameSizes.buf &&
             frameSizes.len !=
@@ -1654,7 +1654,7 @@ Decompressor_multi_decompress_to_buffer(ZstdDecompressor *self, PyObject *args,
             unsigned long long decompressedSize =
                 frameSizesP ? frameSizesP[i] : 0;
 
-            if (0 != PyObject_GetBuffer(PyList_GET_ITEM(frames, i),
+            if (0 != PyObject_GetBuffer(PyList_GetItem(frames, i),
                                         &frameBuffers[i], PyBUF_CONTIG_RO)) {
                 PyErr_Clear();
                 PyErr_Format(PyExc_TypeError,
